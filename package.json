@@ -1,0 +1,35 @@
+{
+  "name": "collu-agent-security-observatory",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/**/*.test.ts",
+    "test:ui": "playwright test",
+    "check": "npm run typecheck && npm run test && npm run build && npm run test:ui",
+    "live:smoke": "tsx scripts/live-smoke.ts"
+  },
+  "dependencies": {
+    "@calcom/cal-sans-ui": "^1.3.0",
+    "@google/genai": "^2.23.0",
+    "@xyflow/react": "^12.8.6",
+    "next": "^16.0.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@tailwindcss/postcss": "^4.1.14",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "tailwindcss": "^4.1.14",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

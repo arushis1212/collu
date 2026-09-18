@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f3f4ef" />
+    <meta
+      name="description"
+      content="A working demo of Collu stopping poisoned agent influence at the production boundary."
+    />
+    <title>Collu — Inline security demo</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="wordmark" href="#/" aria-label="Collu developer workspace">Collu</a>
+        <p class="gateway-status"><span aria-hidden="true"></span>Inline gateway ready</p>
+        <p class="demo-label">Deterministic demo</p>
+      </header>
+
+      <main id="app" tabindex="-1"></main>
+      <p id="state-live" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+    </div>
+
+    <noscript>This demo requires JavaScript.</noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

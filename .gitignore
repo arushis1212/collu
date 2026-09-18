@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.next/
+test-results/
+playwright-report/
+tsconfig.tsbuildinfo
+.vercel/
+.recordings/
+.qa/
+.collu/
+.DS_Store
+
+# The local HyperFrames production workspace is retained as reference, but the
+# runnable product demo and exported walkthrough live at the repository root.
+collu-demo/
+.vercel
+.env*

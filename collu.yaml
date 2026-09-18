@@ -1,0 +1,18 @@
+version: 1
+
+gateway:
+  mode: inline
+
+protect:
+  actions:
+    - secrets.read
+    - deploy.production.execute
+
+policies:
+  - id: external-input-requires-independent-approval
+    when:
+      source_trust: UNTRUSTED_EXTERNAL
+      action: deploy.production.execute
+    require:
+      independent_approval: true
+      authority_expansion: false
