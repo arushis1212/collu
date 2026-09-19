@@ -7,9 +7,9 @@ import {
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Agent Security Observatory",
+  title: "COLLU — Agent Security Observatory",
   description:
-    "Watch risk move through a live multi-agent system and trace every action to its origin.",
+    "Run a live agent workflow, inject a controlled attack, and trace every security decision to its origin.",
 };
 
 export default function RootLayout({

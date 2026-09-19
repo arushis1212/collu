@@ -101,28 +101,36 @@ type EventStreamProps = {
 
 export function EventStream({ events, runActive }: EventStreamProps) {
   const listRef = useRef<HTMLOListElement>(null);
+  const followLatestRef = useRef(true);
   const exposedEventIds = useMemo(() => exposureIds(events), [events]);
   const baseline = useMemo(() => cleanBrief(events), [events]);
 
   useEffect(() => {
     const list = listRef.current;
-    if (!list) return;
+    if (!list || !followLatestRef.current) return;
     list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
   }, [events.length]);
+
+  const rememberScrollPosition = () => {
+    const list = listRef.current;
+    if (!list) return;
+    followLatestRef.current = list.scrollHeight - list.scrollTop - list.clientHeight < 72;
+  };
 
   return (
     <section className="activity-panel" aria-labelledby="activity-heading" data-testid="activity-feed">
       <div className="activity-heading">
-        <div>
+        <div className="activity-heading-copy">
+          <span className="console-path">stream://drink-order/agent-output</span>
           <h2 id="activity-heading">Live agent output</h2>
-          <p>These are the agents&apos; actual generated messages, arriving one handoff at a time.</p>
+          <p>Actual model responses, recorded as each handoff completes.</p>
         </div>
         <span className={`live-indicator ${runActive ? "is-live" : ""}`}>
           <i /> {runActive ? "Live" : `${events.length} ${events.length === 1 ? "update" : "updates"}`}
         </span>
       </div>
 
-      <ol className="activity-list" ref={listRef} aria-live="polite">
+      <ol className="activity-list" onScroll={rememberScrollPosition} ref={listRef} aria-live="polite">
         {events.length === 0 ? (
           <li className="activity-empty">
             <span className="empty-play" aria-hidden="true" />
@@ -130,7 +138,7 @@ export function EventStream({ events, runActive }: EventStreamProps) {
             <p>Start the task to watch each agent think through the order.</p>
           </li>
         ) : (
-          events.map((event) => {
+          events.map((event, index) => {
             const attack = event.eventType === "attack_injection";
             const blocked = event.eventType === "security_alert";
             const affected = !attack && !blocked && exposedEventIds.has(event.id);
@@ -160,37 +168,19 @@ export function EventStream({ events, runActive }: EventStreamProps) {
                 data-event-state={state}
                 key={event.id}
               >
-                <span className="activity-icon" aria-hidden="true">
-                  {blocked ? <ShieldIcon size={16} /> : attack || affected ? <EyeIcon size={16} /> : <CheckIcon size={15} />}
-                </span>
+                <span className="activity-sequence" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                 <div className="activity-body">
                   <div className="activity-title-row">
-                    <strong>{activityLabel(event)}</strong>
+                    <span className="activity-agent">
+                      <span className="activity-icon" aria-hidden="true">
+                        {blocked ? <ShieldIcon size={15} /> : attack || affected ? <EyeIcon size={15} /> : <CheckIcon size={14} />}
+                      </span>
+                      <strong>{activityLabel(event)}</strong>
+                    </span>
                     <time dateTime={event.timestamp}>{eventTime(event.timestamp)}</time>
                   </div>
 
                   <p className="activity-output" data-testid="event-output">{event.content}</p>
-
-                  {worklog.length > 0 && (
-                    <div className="activity-worklog" data-testid="event-worklog">
-                      <span>Work log</span>
-                      <ol>
-                        {worklog.map((entry, index) => <li key={`${event.id}-work-${index}`}>{entry}</li>)}
-                      </ol>
-                    </div>
-                  )}
-
-                  {brief && (
-                    <dl className="activity-brief" data-testid="event-working-brief">
-                      {briefDetails(brief).map(([label, value]) => (
-                        <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
-                      ))}
-                    </dl>
-                  )}
-
-                  {nextStep && (
-                    <p className="activity-next-step"><span>Next</span>{nextStep}</p>
-                  )}
 
                   <div className="activity-footer">
                     <span className={`activity-safety ${risky ? "is-risky" : ""} ${changed ? "is-changed" : ""} ${rejected ? "is-rejected" : ""}`}>
@@ -213,17 +203,40 @@ export function EventStream({ events, runActive }: EventStreamProps) {
                         Attack linked in this model&apos;s recorded input
                       </span>
                     )}
-                    <details>
-                      <summary>Technical evidence</summary>
-                      <dl>
-                        <div><dt>Recorded source</dt><dd>{technicalRole(event.sourceId)}</dd></div>
-                        <div><dt>Next destination</dt><dd>{technicalRole(event.destinationId)}</dd></div>
-                        <div><dt>Risk score</dt><dd>{event.riskScore}/100</dd></div>
-                        <div><dt>Recorded signals</dt><dd>{event.flags.join(", ") || "None"}</dd></div>
-                        <div><dt>Event ID</dt><dd>{event.id}</dd></div>
-                        <div><dt>Parent ID</dt><dd>{event.parentEventId ?? "None"}</dd></div>
-                        <div><dt>Model input provenance</dt><dd>{event.influencedBy.join(", ") || "None"}</dd></div>
-                      </dl>
+                    <details className="activity-inspection">
+                      <summary>Inspect context and evidence</summary>
+                      <div className="activity-inspection-body">
+                        {worklog.length > 0 && (
+                          <div className="activity-worklog" data-testid="event-worklog">
+                            <span>Work log</span>
+                            <ol>
+                              {worklog.map((entry, workIndex) => <li key={`${event.id}-work-${workIndex}`}>{entry}</li>)}
+                            </ol>
+                          </div>
+                        )}
+
+                        {brief && (
+                          <dl className="activity-brief" data-testid="event-working-brief">
+                            {briefDetails(brief).map(([label, value]) => (
+                              <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
+                            ))}
+                          </dl>
+                        )}
+
+                        {nextStep && (
+                          <p className="activity-next-step"><span>Next</span>{nextStep}</p>
+                        )}
+
+                        <dl className="activity-technical">
+                          <div><dt>Recorded source</dt><dd>{technicalRole(event.sourceId)}</dd></div>
+                          <div><dt>Next destination</dt><dd>{technicalRole(event.destinationId)}</dd></div>
+                          <div><dt>Risk score</dt><dd>{event.riskScore}/100</dd></div>
+                          <div><dt>Recorded signals</dt><dd>{event.flags.join(", ") || "None"}</dd></div>
+                          <div><dt>Event ID</dt><dd>{event.id}</dd></div>
+                          <div><dt>Parent ID</dt><dd>{event.parentEventId ?? "None"}</dd></div>
+                          <div><dt>Model input provenance</dt><dd>{event.influencedBy.join(", ") || "None"}</dd></div>
+                        </dl>
+                      </div>
                     </details>
                   </div>
                 </div>

@@ -565,6 +565,38 @@ async function expectAuthorizedPlan(panel: Locator) {
   await expect(panel).toContainText("Fresh approval required");
 }
 
+test("command sidebar collapses on desktop and becomes a mobile drawer", async ({ page }) => {
+  const browserErrors = collectBrowserErrors(page);
+  await page.goto("/");
+
+  const sidebar = page.locator('[data-slot="sidebar"]');
+  const topbar = page.locator(".workspace-topbar");
+  await expect(sidebar).toHaveAttribute("data-state", "expanded");
+  await expect(page.getByRole("textbox", { name: "Task", exact: true })).toBeVisible();
+
+  await topbar.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
+  await expect(sidebar).toHaveAttribute("data-state", "collapsed");
+  await expect(page.getByRole("textbox", { name: "Task", exact: true })).not.toBeVisible();
+
+  await topbar.getByRole("button", { name: "Expand sidebar", exact: true }).click();
+  await expect(sidebar).toHaveAttribute("data-state", "expanded");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(sidebar).toHaveAttribute("data-mobile", "true");
+  await expect(sidebar).toHaveAttribute("data-state", "collapsed");
+  await expect(sidebar).toHaveAttribute("aria-hidden", "true");
+
+  await topbar.getByRole("button", { name: "Expand sidebar", exact: true }).click();
+  await expect(sidebar).toHaveAttribute("data-state", "expanded");
+  await expect(sidebar).toHaveAttribute("aria-hidden", "false");
+  await expect(page.getByRole("textbox", { name: "Task", exact: true })).toBeVisible();
+
+  await sidebar.getByRole("button", { name: "Close sidebar", exact: true }).click();
+  await expect(sidebar).toHaveAttribute("data-state", "collapsed");
+  await expectNoHorizontalOverflow(page);
+  expect(browserErrors).toEqual([]);
+});
+
 test("clean sandbox run shows the real order state and exact agent outputs", async ({ page }) => {
   const requests: JsonRecord[] = [];
   const browserErrors = collectBrowserErrors(page);

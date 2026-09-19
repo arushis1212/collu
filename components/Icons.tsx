@@ -126,3 +126,13 @@ export function CloseIcon(props: IconProps) {
     </IconBase>
   );
 }
+
+export function PanelLeftIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <rect height="16" rx="2" stroke="currentColor" strokeWidth="1.7" width="18" x="3" y="4" />
+      <path d="M9 4v16" stroke="currentColor" strokeWidth="1.7" />
+      <path d="m14.5 9-2.5 3 2.5 3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
+    </IconBase>
+  );
+}

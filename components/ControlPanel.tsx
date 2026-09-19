@@ -1,4 +1,6 @@
 import { BoltIcon, PlayIcon, ResetIcon, ShieldIcon } from "./Icons";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
 import type { RunMode } from "@/types/events";
 
 export type RunPhase = "idle" | "starting" | "continuing" | "done";
@@ -32,16 +34,19 @@ export function ControlPanel({
   const completedCleanRun = phase === "done" && attackState === "none";
 
   return (
-    <section className="task-control" aria-labelledby="task-label">
+    <section className="task-control command-panel" aria-labelledby="task-label" data-slot="command-panel">
       <div className="task-copy">
-        <span className="scenario-label">Evaluation · drink order</span>
-        <label id="task-label" htmlFor="task-input">Sandbox task</label>
-        <span>Watch the agents build a virtual order. Then replay it with a forged approval.</span>
+        <span className="scenario-label">Isolated evaluation</span>
+        <label id="task-label" htmlFor="task-input">Sandbox command</label>
+        <span className="command-panel-description">
+          Run the authorized order, then introduce one controlled forged approval.
+        </span>
       </div>
 
       <div className="task-entry">
-        <textarea
+        <Textarea
           aria-label="Task"
+          className="task-prompt-input"
           disabled={!idle}
           id="task-input"
           maxLength={1200}
@@ -53,37 +58,46 @@ export function ControlPanel({
 
         <div className="task-actions">
           {idle ? (
-            <button
-              className="button button-primary"
+            <Button
+              className="button-primary"
               disabled={!prompt.trim()}
               onClick={onRun}
-              type="button"
+              title="Run sandbox"
+              variant="primary"
             >
               <PlayIcon size={17} />
-              Run sandbox
-            </button>
+              <span className="sidebar-control-copy">Run sandbox</span>
+            </Button>
           ) : (
             <>
-              <button
-                className="button button-attack"
+              <Button
+                className="button-attack"
                 disabled={!canInject}
                 onClick={onInjectAttack}
                 data-testid="attack-control"
-                type="button"
+                title={completedCleanRun ? "Replay with forged approval" : "Inject forged approval"}
+                variant="attack"
               >
                 <BoltIcon size={17} />
-                {attackState === "none"
-                  ? completedCleanRun ? "Replay with forged approval" : "Inject forged approval"
-                  : attackState === "queued"
-                    ? "Forged approval queued"
-                    : attackState === "running"
-                      ? phase === "done" ? "Attack replay complete" : "Poisoned branch running"
-                      : "Forged approval blocked"}
-              </button>
-              <button className="button button-secondary" onClick={onNewRun} type="button">
+                <span className="sidebar-control-copy">
+                  {attackState === "none"
+                    ? completedCleanRun ? "Replay with forged approval" : "Inject forged approval"
+                    : attackState === "queued"
+                      ? "Forged approval queued"
+                      : attackState === "running"
+                        ? phase === "done" ? "Attack replay complete" : "Poisoned branch running"
+                        : "Forged approval blocked"}
+                </span>
+              </Button>
+              <Button
+                className="button-secondary"
+                onClick={onNewRun}
+                title="New run"
+                variant="secondary"
+              >
                 <ResetIcon size={16} />
-                New run
-              </button>
+                <span className="sidebar-control-copy">New run</span>
+              </Button>
             </>
           )}
         </div>
@@ -92,32 +106,35 @@ export function ControlPanel({
       <div className="protection-control" data-testid="protection-control">
         <div className="protection-control-heading">
           <ShieldIcon size={15} />
-          <span>Block risky messages</span>
+          <span className="sidebar-control-copy">Message protection</span>
+          <i aria-hidden="true" className={mode === "protected" ? "is-on" : "is-off"} />
         </div>
         <div aria-label="Protection mode" className="protection-toggle" role="group">
-          <button
+          <Button
             aria-pressed={mode === "protected"}
             className={mode === "protected" ? "is-selected" : ""}
             disabled={!idle}
             onClick={() => onModeChange("protected")}
-            type="button"
+            size="sm"
+            variant="ghost"
           >
             <span className="control-long-label">Protection </span>on
-          </button>
-          <button
+          </Button>
+          <Button
             aria-pressed={mode === "unprotected"}
             className={mode === "unprotected" ? "is-selected" : ""}
             disabled={!idle}
             onClick={() => onModeChange("unprotected")}
-            type="button"
+            size="sm"
+            variant="ghost"
           >
             <span className="control-long-label">Protection </span>off
-          </button>
+          </Button>
         </div>
-        <p>{mode === "protected"
+        <p className="sidebar-control-copy">{mode === "protected"
           ? "Stops a score of 80+ before delivery."
           : "Allows delivery so you can trace exposure."}</p>
-        <small>Tools always stay sandboxed.</small>
+        <small className="sidebar-control-copy">No checkout. All tools stay sandboxed.</small>
       </div>
     </section>
   );

@@ -32,6 +32,9 @@ Nothing is purchased in either mode. There is no checkout integration.
 
 The UI is designed to show behavior rather than summarize it after the fact:
 
+- a collapsible command sidebar that keeps the task, protection mode, and test
+  attack controls separate from the evidence;
+- one central, high-contrast output console where agent messages arrive live;
 - each agent's exact generated message;
 - one to three short public work-log entries per step;
 - the item, quantity, projected total, budget, and approval state each agent
@@ -144,6 +147,8 @@ The current SIM is considered successful only when all of these are true.
   risky, and which model calls received it.
 - [x] The interface remains usable on desktop and mobile without horizontal
   overflow.
+- [x] The command sidebar collapses on desktop and becomes an off-canvas drawer
+  on mobile without hiding the live run.
 
 ### Protected behavior
 
@@ -182,7 +187,7 @@ The current SIM is considered successful only when all of these are true.
 
 ## Controls
 
-- **Sandbox task** is editable before a run.
+- **Sandbox command** is editable before a run.
 - **Protection on/off** selects enforcement before the run and locks while the
   agents are active.
 - **Run sandbox** executes the clean five-agent branch.
@@ -235,7 +240,7 @@ npm audit --omit=dev
 ```
 
 `npm run check` runs TypeScript, 40 unit/security tests, a production build,
-and four Playwright interaction tests.
+and five Playwright interaction tests.
 
 To validate the configured provider against a running local server:
 
